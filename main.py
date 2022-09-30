@@ -13,6 +13,8 @@ pygame.init()
 #sounds
 jump_fx = pygame.mixer.Sound('assets/sfx/jump.mp3')
 jump_fx.set_volume(0.5)
+death_fx = pygame.mixer.Sound('assets/sfx/death.mp3')
+death_fx.set_volume(0.5)
 
 # game window dimensions
 SCREEN_WIDTH = 400
@@ -39,8 +41,8 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
 
 # Speed
-HORIZONTAL_SPEED = 5
-VERTICAL_SPEED = 5
+HORIZONTAL_SPEED = 10
+VERTICAL_SPEED = 10
 GRAVITY = 1
 
 #game variables
@@ -55,6 +57,9 @@ fade_counter = 0
 """
     VARIABLES
 """
+# game variables
+score = 0
+
 # set frame rate 
 clock = pygame.time.Clock()
 
@@ -70,27 +75,26 @@ player_image = pygame.image.load('assets/gfx/player.png').convert_alpha()
     PLATFORM
 """
 class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width):
+    def __init__(self, x, y, width, moving):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(platform_image, (width, PLATFORM_HEIGHT))
+        self.moving = moving
+        self.move_counter = random.randint(0, 50)
+        self.direction = random.choice([-1, 1])
+        self.speed = random.randint(1, 2)
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-
-
-# game variables
-
-# Create platform group
-platform_group = pygame.sprite.Group()
-
-# Create temporary platforms
-for p in range(MAX_PLATFORMS):
-    p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
-    p_x = random.randint(0, SCREEN_WIDTH - p_w)
-    p_y = p * random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
-    new_platform = Platform(p_x, p_y, p_w)
-    platform_group.add(new_platform)
     
+    # def update(self, scroll):
+        # TODO: add moving platforms
+        # Create starting platform
+
+
+platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False)
+platform_group = pygame.sprite.Group()
+platform_group.add(platform)    
+
 """
     PLAYER
 """
@@ -151,8 +155,12 @@ class Player(pygame.sprite.Sprite):
 
         return scroll
 
-        def draw(self):
-            screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
+    def draw(self):
+        screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
+
+#player instance
+player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
+
 
 """
     GAME
@@ -161,12 +169,36 @@ run = True
 while run:
 
     clock.tick(FPS)
+    if game_over == False:
+        scroll = player.move()
+        # draw background
+        screen.blit(bg_image, (0,0))
+    
+        # Generate platforms
+        if (len(platform_group) < MAX_PLATFORMS):
+            p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
+            p_x = random.randint(0, SCREEN_WIDTH - p_w)
+            p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
+            # Type 1 for moving platforms, type 2 for static platforms
+            p_type = random.randint(1, 2)
 
-    # draw background
-    screen.blit(bg_image, (0,0))
+            if p_type == 1 and score > 500:
+                p_moving = True
+            else:
+                p_moving = False
+            platform = Platform(p_x, p_y, p_w, p_moving)
+            platform_group.add(platform)
 
-    # draw sprites
-    platform_group.draw(screen)
+    
+        # Draw sprites
+        platform_group.draw(screen)
+        player.draw()
+
+        #check game over
+        if player.rect.top > SCREEN_HEIGHT:
+            game_over = True
+            death_fx.play()
+
 
     # event handler
     for event in pygame.event.get():
