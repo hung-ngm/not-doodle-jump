@@ -10,6 +10,10 @@ pygame.init()
 """
     CONSTANTS
 """
+#sounds
+jump_fx = pygame.mixer.Sound('assets/sfx/jump.mp3')
+jump_fx.set_volume(0.5)
+
 # game window dimensions
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
@@ -34,6 +38,20 @@ PLATFORM_MAX_HEIGHT_DIFF = 120
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
 
+# Speed
+HORIZONTAL_SPEED = 5
+VERTICAL_SPEED = 5
+GRAVITY = 1
+
+#game variables
+SCROLL_THRESH = 200
+MAX_PLATFORMS = 10
+scroll = 0
+bg_scroll = 0
+game_over = False
+score = 0
+fade_counter = 0
+
 """
     VARIABLES
 """
@@ -44,8 +62,9 @@ clock = pygame.time.Clock()
 # load music and sounds
 
 # load images
-bg_image = pygame.image.load('assets/bg.png').convert_alpha()
-platform_image = pygame.image.load('assets/wood.png').convert_alpha()
+bg_image = pygame.image.load('assets/gfx/bg.png').convert_alpha()
+platform_image = pygame.image.load('assets/gfx/wood.png').convert_alpha()
+player_image = pygame.image.load('assets/gfx/player.png').convert_alpha()
 
 """
     PLATFORM
@@ -71,6 +90,69 @@ for p in range(MAX_PLATFORMS):
     p_y = p * random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
     new_platform = Platform(p_x, p_y, p_w)
     platform_group.add(new_platform)
+    
+"""
+    PLAYER
+"""
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        self.image = pygame.transform.scale(player_image, (45, 45))
+        self.width = 25
+        self.height = 40
+        self.rect = pygame.Rect(0, 0, self.width, self.height)
+        self.rect.center = (x, y)
+        self.vel_y = 0
+        self.flip = False
+
+    def move(self):
+        #reset movement variables
+        dx = 0
+        dy = 0
+        scroll = 0
+
+        #process input
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            dx -= HORIZONTAL_SPEED
+            self.flip = True
+        if key[pygame.K_RIGHT]:
+            dx += HORIZONTAL_SPEED
+            self.flip = False
+
+        #apply gravity
+        self.vel_y += GRAVITY
+        dy += self.vel_y
+
+        #check for collision with platforms
+        for platform in platform_group:
+            #collision in the y direction
+            if platform.rect.colliderect(self.rect.x, self.rect.y + dy, self.width, self.height):
+                #check if above platform
+                if self.rect.bottom < platform.rect.centery:
+                    if self.vel_y > 0:
+                        self.rect.bottom = platform.rect.top
+                        dy = 0
+                        self.vel_y = -20
+                        jump_fx.play()
+
+        #check if player hit top of screen
+        if self.rect.top + dy <= SCROLL_THRESH:
+            dy = -self.rect.top
+            #if player is jumping
+            if self.vel_y < 0:
+                scroll = -dy
+
+        #update rectangle position
+        self.rect.x += dx
+        self.rect.y += dy + scroll
+
+		#update mask
+        self.mask = pygame.mask.from_surface(self.image)
+
+        return scroll
+
+        def draw(self):
+            screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
 
 """
     GAME
