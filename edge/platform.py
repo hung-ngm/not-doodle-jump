@@ -15,6 +15,19 @@ class Platform(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
     
-    # def update(self, scroll):
-        # TODO: add moving platforms
-        # Create starting platform
+    def update(self, scroll):
+        # Moving platform side to side
+        if self.moving == True:
+            self.move_counter += 1
+            self.rect.x += self.direction * self.speed
+        
+        if self.move_counter >= 100 or self.rect.left < 0 or self.rect.right > SCREEN_WIDTH:
+            self.direction *= -1
+            self.move_counter = 0
+        
+        # Update platform's vertical position
+        self.rect.y += scroll
+
+        # Check if platform has gone off screen
+        if self.rect.top > SCREEN_HEIGHT:
+            self.kill()
