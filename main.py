@@ -192,7 +192,6 @@ while run:
         platform_group.draw(screen)
         bluebird_group.draw(screen)
         fireball_group.draw(screen)
-
         player.draw()
 
         #check game over
