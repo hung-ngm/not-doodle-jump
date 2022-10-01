@@ -1,6 +1,5 @@
 import pygame
 import random
-import os
 from pygame import mixer
 from constant import *
 from edge.platform import *
@@ -8,6 +7,8 @@ from obstacles_sprite.Bluebird import *
 from obstacles_sprite.BluebirdSpritesheet import *
 from obstacles_sprite.Fireball import *
 from obstacles_sprite.FireballSpritesheet import *
+from boss.Boss import *
+from boss.BossSpritesheet import *
 
 """
     Initialise pygame
@@ -24,14 +25,11 @@ jump_fx.set_volume(0.5)
 death_fx = pygame.mixer.Sound('assets/sfx/death.mp3')
 death_fx.set_volume(0.5)
 
-
-
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
 
 # Game variables
-
 scroll = 0
 bg_scroll = 0
 game_over = False
@@ -135,6 +133,10 @@ bluebird_group = pygame.sprite.Group()
 fireball_spritesheet = FireballSpritesheet('assets/obstacles/Fireball')
 fireball_group = pygame.sprite.Group()
 
+# boss
+boss_spritesheet = BossSpritesheet('assets/boss/Boss')
+boss_group = pygame.sprite.Group()
+
 """
     GAME
 """
@@ -170,14 +172,17 @@ while run:
             fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH -32), fireball_spritesheet, 1.5)
             fireball_group.add(fireball)
         
+        
         # Update group
         bluebird_group.update(0, SCREEN_WIDTH)
         fireball_group.update(0, SCREEN_HEIGHT)
+        
         
         # Draw sprites
         platform_group.draw(screen)
         bluebird_group.draw(screen)
         fireball_group.draw(screen)
+
         player.draw()
 
         #check game over
