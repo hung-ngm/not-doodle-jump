@@ -151,7 +151,7 @@ while run:
         scroll = player.move()
         # draw background
         bg_scroll += scroll
-        if bg_scroll >= 400:
+        if bg_scroll >= 600:
             bg_scroll = 0
         draw_bg(bg_scroll)
     
