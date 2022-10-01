@@ -2,8 +2,14 @@ import pygame
 import random
 import os
 from pygame import mixer
+from obstacles_sprite.Bluebird import *
+from obstacles_sprite.BluebirdSpritesheet import *
+# from obstacles_sprite.Fireball import *
+# from obstacles_sprite.FireballSpritesheet import *
 
-# Initialise pygame
+"""
+    Initialise pygame
+"""
 mixer.init()
 pygame.init()
 
@@ -63,7 +69,6 @@ score = 0
 # set frame rate 
 clock = pygame.time.Clock()
 
-
 # load music and sounds
 
 # load images
@@ -89,11 +94,6 @@ class Platform(pygame.sprite.Sprite):
     # def update(self, scroll):
         # TODO: add moving platforms
         # Create starting platform
-
-
-platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False)
-platform_group = pygame.sprite.Group()
-platform_group.add(platform)    
 
 """
     PLAYER
@@ -158,9 +158,22 @@ class Player(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
 
+
+"""
+    Instances and sprite
+"""
 #player instance
 player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
 
+# platform group 
+platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False)
+platform_group = pygame.sprite.Group()
+platform_group.add(platform)   
+
+# obstacles groups
+bluebird_spritesheet = BluebirdSpritesheet('assets/obstacles/Bluebird')
+bluebird_group = pygame.sprite.Group()
+fireball_group = pygame.sprite.Group()
 
 """
     GAME
@@ -189,9 +202,15 @@ while run:
             platform = Platform(p_x, p_y, p_w, p_moving)
             platform_group.add(platform)
 
-    
+        # Generate obstacles
+        if len(bluebird_group) == 0:
+            bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
+            bluebird_group.add(bluebird)
+        
+        bluebird_group.update(0, SCREEN_WIDTH)
         # Draw sprites
         platform_group.draw(screen)
+        bluebird_group.draw(screen)
         player.draw()
 
         #check game over
