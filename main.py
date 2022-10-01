@@ -111,11 +111,10 @@ class Player(pygame.sprite.Sprite):
             dx += HORIZONTAL_SPEED
             self.flip = False
         
-        if (score >= 200):
+        if (score >= BOSS_LEVEL_SCORE):
             if key[pygame.K_UP]:
                 dy -= VERTICAL_SPEED
 
- 
         self.vel_y += GRAVITY
         dy += self.vel_y
 
@@ -129,7 +128,7 @@ class Player(pygame.sprite.Sprite):
                         self.rect.bottom = platform.rect.top
                         dy = 0
                         self.vel_y = -20
-                        if (score > 200):
+                        if (score > BOSS_LEVEL_SCORE):
                             self.vel_y = 0
 
         #check if player hit top of screen
@@ -221,7 +220,7 @@ while run:
             score += scroll
     
         # Boss level
-        if score >= 200:
+        if score >= BOSS_LEVEL_SCORE:
             
             # Reset sprites
             platform_group.empty()
@@ -232,7 +231,7 @@ while run:
             platform_group.add(platform)
 
             if len(boss_group) == 0:
-                boss = Boss(SCREEN_WIDTH, 100, boss_spritesheet, 1.5)
+                boss = Boss(SCREEN_WIDTH, 20, boss_spritesheet, 1.5)
                 boss_group.add(boss)
             
             # Sprites update
@@ -240,8 +239,9 @@ while run:
             platform_group.update(scroll)
             fireball_group.update(scroll, SCREEN_HEIGHT)
 
-        #draw panel
-        draw_panel()
+        # Draw panel
+        if (score < BOSS_LEVEL_SCORE):
+            draw_panel()
         
         # Draw sprites
         platform_group.draw(screen)
