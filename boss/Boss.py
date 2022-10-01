@@ -6,8 +6,8 @@ class Boss(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         
         # movement
-        self.direction = random.choice([-1, 1])
-        self.flip = True if self.direction == -1 else False
+        self.direction = 1
+        self.flip = False
         
         # animation
         self.animation_list = []
@@ -28,6 +28,8 @@ class Boss(pygame.sprite.Sprite):
         self.rect.y = y
     
     def update(self, scroll = 0, SCREEN_WIDTH = 400):
+        moveCount = 0
+
         # Update animation
         ANIMATION_COOLDOWN = 50
 
@@ -43,6 +45,16 @@ class Boss(pygame.sprite.Sprite):
         self.rect.x += self.direction * 2
         self.rect.y += scroll
 
-        # Check if boss is off screen
-        if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
-            self.kill()
+        # Reverse if the boss is off screen
+        if self.rect.right < self.rect.width // 2 + 103:
+            self.direction = 1
+            self.flip = False
+        
+        if self.rect.left > SCREEN_WIDTH - self.rect.width // 2:
+            self.direction = -1
+            self.flip = True
+    
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+        pygame.draw.rect(surface, (255, 255, 255), self.rect, 2)
+        

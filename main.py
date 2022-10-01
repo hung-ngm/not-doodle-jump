@@ -178,17 +178,18 @@ weapon_group = pygame.sprite.Group()
 """
     GAME
 """
-beginning = True
+# beginning = True
 run = True
+beginning = True
 while run:
-    clock.tick(FPS)
+    clock.tick(FPS)    
     if beginning:
         boss_group.empty()
         bluebird_group.empty()
         fireball_group.empty()
         weapon_group.empty()
         beginning = False
-        
+
     if game_over == False:
         scroll = player.move(score)
 
@@ -240,28 +241,24 @@ while run:
         platform_group.update(scroll)
         fireball_group.update(scroll, SCREEN_HEIGHT)
         weapon_group.update(scroll, SCREEN_HEIGHT)
+       
         #update score
         if scroll > 0:
             score += scroll
     
         # Boss level
         if score >= BOSS_LEVEL_SCORE:
-            
+            platform_group.empty()
+            bluebird_group.empty()
+
             # Reset sprites
             platform = Platform(0, SCREEN_HEIGHT - 10, SCREEN_WIDTH, False, platform_image)
             platform_group.add(platform)
 
             if len(boss_group) == 0:
-                boss = Boss(SCREEN_WIDTH, 20, boss_spritesheet, 1.5)
+                boss = Boss(SCREEN_WIDTH, SCREEN_WIDTH // 2 - 50, boss_spritesheet, 1.5)
                 boss_group.add(boss)
-            # Generate obstacles
-            if len(bluebird_group) == 0:
-                bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
-                bluebird_group.add(bluebird)
-            
-            if len(fireball_group) == 0:
-                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
-                fireball_group.add(fireball)
+                
             
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
@@ -274,12 +271,12 @@ while run:
                     weapon_group.add(weapon)
 
             # Update group
-            boss_group.update(scroll, SCREEN_WIDTH)
+            boss_group.update()
             platform_group.update(scroll)
             bluebird_group.update(scroll, SCREEN_WIDTH)
             fireball_group.update(scroll, SCREEN_HEIGHT)
-            boss_group.update(scroll, SCREEN_WIDTH)
             weapon_group.update(scroll, SCREEN_HEIGHT)
+
             #update score
             if scroll > 0:
                 score += scroll
@@ -302,14 +299,15 @@ while run:
             death_fx.play()
         
         # Check collision
-        if pygame.sprite.spritecollide(player, bluebird_group, False):
-            if pygame.sprite.spritecollide(player, bluebird_group, False, pygame.sprite.collide_mask):
-                game_over = True
-                death_fx.play()
-        if pygame.sprite.spritecollide(player, fireball_group, False):
-            if pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask):
-                game_over = True
-                death_fx.play()
+        # if pygame.sprite.spritecollide(player, bluebird_group, False):
+        #     if pygame.sprite.spritecollide(player, bluebird_group, False, pygame.sprite.collide_mask):
+        #         game_over = True
+        #         death_fx.play()
+
+        # if pygame.sprite.spritecollide(player, fireball_group, False):
+        #     if pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask):
+        #         game_over = True
+        #         death_fx.play()
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
             death_fx.play()
@@ -322,9 +320,9 @@ while run:
                 pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100))
         
         else:
-            draw_text('GAME OVER!', font_big, WHITE, 130, 200)
-            draw_text('SCORE: ' + str(score), font_big, WHITE, 130, 250)
-            draw_text('PRESS SPACE TO PLAY AGAIN', font_big, WHITE, 40, 300)
+            draw_text('GAME OVER!', font_big, WHITE, 150, 200)
+            draw_text('SCORE: ' + str(score), font_big, WHITE, 155, 250)
+            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 65, 300)
 			
             # Update high score
             if score > high_score:
@@ -332,7 +330,7 @@ while run:
                 with open('score.txt', 'w') as file:
                     file.write(str(high_score))
             key = pygame.key.get_pressed()
-            if key[pygame.K_SPACE]:
+            if key[pygame.K_RETURN]:
                 # Reset variables
                 game_over = False
                 score = 0
