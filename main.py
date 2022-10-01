@@ -166,7 +166,6 @@ fireball_group = pygame.sprite.Group()
 # boss
 boss_spritesheet = BossSpritesheet('assets/boss/Boss')
 boss_group = pygame.sprite.Group()
-
 """
     GAME
 """
@@ -180,42 +179,49 @@ while run:
         if bg_scroll >= 600:
             bg_scroll = 0
         draw_bg(bg_scroll)
+
+        if score <= 1500:
     
-        # Generate platforms
-        if (len(platform_group) < MAX_PLATFORMS):
-            p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
-            p_x = random.randint(0, SCREEN_WIDTH - p_w)
-            p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
-            # Type 1 for moving platforms, type 2 for static platforms
-            p_type = random.randint(1, 2)
+            # Generate platforms
+            if (len(platform_group) < MAX_PLATFORMS):
+                p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
+                p_x = random.randint(0, SCREEN_WIDTH - p_w)
+                p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
+                # Type 1 for moving platforms, type 2 for static platforms
+                p_type = random.randint(1, 2)
 
-            if p_type == 1 and score > 500:
-                p_moving = True
-            else:
-                p_moving = False
-            platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
-            platform_group.add(platform)
+                if p_type == 1 and score > 500:
+                    p_moving = True
+                else:
+                    p_moving = False
+                platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
+                platform_group.add(platform)
 
-        #update platforms
-        platform_group.update(scroll)
+            #update platforms
+            platform_group.update(scroll)
 
-        # Generate obstacles
-        if len(bluebird_group) == 0:
-            bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
-            bluebird_group.add(bluebird)
-        
-        if len(fireball_group) == 0:
-            fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH -32), fireball_spritesheet, 1.5)
-            fireball_group.add(fireball)
-        
-        
-        # Update group
-        bluebird_group.update(scroll, SCREEN_WIDTH)
-        fireball_group.update(scroll, SCREEN_HEIGHT)
-        
-        #update score
-        if scroll > 0:
-            score += scroll
+            # Generate obstacles
+            if len(bluebird_group) == 0:
+                bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
+                bluebird_group.add(bluebird)
+            
+            if len(fireball_group) == 0:
+                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH -32), fireball_spritesheet, 1.5)
+                fireball_group.add(fireball)
+            
+            if len(boss_group) == 0:
+                boss = Boss(SCREEN_WIDTH, 100, boss_spritesheet, 1.5)
+                boss_group.add(boss)
+            
+            
+            # Update group
+            bluebird_group.update(scroll, SCREEN_WIDTH)
+            fireball_group.update(scroll, SCREEN_HEIGHT)
+            boss_group.update(scroll, SCREEN_WIDTH)
+            
+            #update score
+            if scroll > 0:
+                score += scroll
 
         #draw panel
         draw_panel()
@@ -224,13 +230,53 @@ while run:
         platform_group.draw(screen)
         bluebird_group.draw(screen)
         fireball_group.draw(screen)
+        boss_group.draw(screen)
+
         player.draw()
 
         #check game over
         if player.rect.top > SCREEN_HEIGHT:
             game_over = True
             death_fx.play()
+    
+    else:
+        if fade_counter < SCREEN_WIDTH:
+            fade_counter += 5
+            for y in range(0, 6, 2):
+                pygame.draw.rect(screen, BLACK, (0, y * 100, fade_counter, 100))
+                pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100))
+        
+        else:
+            draw_text('GAME OVER!', font_big, WHITE, 130, 200)
+            draw_text('SCORE: ' + str(score), font_big, WHITE, 130, 250)
+            draw_text('PRESS SPACE TO PLAY AGAIN', font_big, WHITE, 40, 300)
+			
+            # Update high score
+            if score > high_score:
+                high_score = score
+                with open('score.txt', 'w') as file:
+                    file.write(str(high_score))
+            key = pygame.key.get_pressed()
+            if key[pygame.K_SPACE]:
+                # Reset variables
+                game_over = False
+                score = 0
+                scroll = 0
+                fade_counter = 0
 
+                # Reset the position of the player
+                player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
+
+                # Reset the enemies
+                bluebird_group.empty()
+
+                # Reset the platforms
+                platform_group.empty()
+
+                # Create starting platform
+                platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False, platform_image)
+                platform_group.add(platform)
+		    
 
     # event handler
     for event in pygame.event.get():

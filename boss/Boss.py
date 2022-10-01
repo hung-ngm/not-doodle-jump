@@ -13,11 +13,11 @@ class Boss(pygame.sprite.Sprite):
         self.animation_list = []
         self.frame_index = 0
         self.last_update_time = pygame.time.get_ticks()
-        self.ANIMATIONS = 2
+        self.ANIMATIONS = 4
         
         # load image animation
         for animation_index in range(1, self.ANIMATIONS + 1):
-            image = sprite_sheet.get_image(animation_index, 32, 32, scale, (0, 0, 0))
+            image = sprite_sheet.get_image(animation_index, 288, 160, scale, (0, 0, 0))
             image = pygame.transform.flip(image, flip_x = self.flip, flip_y = False)
             image.set_colorkey((0, 0, 0))
             self.animation_list.append(image)
