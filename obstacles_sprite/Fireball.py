@@ -4,9 +4,6 @@ import random
 class Fireball(pygame.sprite.Sprite):
     def __init__(self, SCREEN_HEIGHT, x, sprite_sheet, scale):
         pygame.sprite.Sprite.__init__(self)
-        # movement
-        # self.direction = 1 #random.choice([-1, 1])
-        # self.flip = False #True if self.direction == -1 else False
         
         # animation
         self.animation_list = []
@@ -16,7 +13,7 @@ class Fireball(pygame.sprite.Sprite):
         
         # load image animation
         for animation_index in range(1, self.ANIMATIONS + 1):
-            image = sprite_sheet.get_image(animation_index, 64, 64, scale, (0, 0, 0))
+            image = sprite_sheet.get_image(animation_index, 50, 50, scale, (0, 0, 0))
             image = pygame.transform.flip(image, flip_x = True, flip_y = False)
             image.set_colorkey((0, 0, 0))
             self.animation_list.append(image)
@@ -43,4 +40,4 @@ class Fireball(pygame.sprite.Sprite):
         
     def draw(self, screen):
         screen.blit(self.image, self.rect)
-        pygame.draw.rect(screen, (255,255,255), self.rect, 2)
+        pygame.draw.rect(screen, (0,0,0), self.rect)

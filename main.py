@@ -324,10 +324,10 @@ while run:
         #         game_over = True
         #         death_fx.play()
 
-        # if pygame.sprite.spritecollide(player, fireball_group, False):
-        #     if pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask):
-        #         game_over = True
-        #         death_fx.play()
+        if pygame.sprite.spritecollide(player, fireball_group, False):
+            if pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask):
+                game_over = True
+                death_fx.play()
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
             hit_fx.play()
