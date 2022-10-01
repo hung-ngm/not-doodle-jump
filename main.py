@@ -27,7 +27,8 @@ jump_fx = pygame.mixer.Sound('assets/sfx/jump.mp3')
 jump_fx.set_volume(0.5)
 death_fx = pygame.mixer.Sound('assets/sfx/death.mp3')
 death_fx.set_volume(0.5)
-
+hit_fx = pygame.mixer.Sound('assets/sfx/hit.wav')
+hit_fx.set_volume(0.5)
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
@@ -243,7 +244,7 @@ while run:
         #update score
         if scroll > 0:
             score += scroll
-    
+            
         # Boss level
         if score >= BOSS_LEVEL_SCORE:
             
@@ -312,7 +313,7 @@ while run:
                 death_fx.play()
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
-            death_fx.play()
+            hit_fx.play()
     else:
         # Play again screen
         if fade_counter < SCREEN_WIDTH:

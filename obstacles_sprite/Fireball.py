@@ -22,9 +22,8 @@ class Fireball(pygame.sprite.Sprite):
             self.animation_list.append(image)
         
         self.image = self.animation_list[self.frame_index]
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = 0
+        self.rect = pygame.Rect((12,12), (64, 64))
+        self.rect.center = (x, 0)
         
     def update(self, scroll = 0, SCREEN_HEIGHT = 600):
         ANIMATION_COOLDOWN = 1000/60 #ms
@@ -42,4 +41,6 @@ class Fireball(pygame.sprite.Sprite):
         if self.rect.top > SCREEN_HEIGHT:
             self.kill()
         
-    
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, (255,255,255), self.rect, 2)
