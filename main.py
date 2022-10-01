@@ -11,7 +11,8 @@ from obstacles_sprite.Fireball import *
 from obstacles_sprite.FireballSpritesheet import *
 from boss.Boss import *
 from boss.BossSpritesheet import *
-
+from weapon.Weapon import *
+from weapon.WeaponSpritesheet import *
 """
     Initialise pygame
 """
@@ -38,6 +39,7 @@ game_over = False
 score = 0
 fade_counter = 0
 
+
 if os.path.exists('score.txt'):
     with open('score.txt', 'r') as file:
 	    high_score = int(file.read())
@@ -56,7 +58,7 @@ score = 0
 
 # set frame rate 
 clock = pygame.time.Clock()
-
+last_attack = pygame.time.get_ticks()
 # load music and sounds
 
 # load images
@@ -169,12 +171,24 @@ fireball_group = pygame.sprite.Group()
 # boss
 boss_spritesheet = BossSpritesheet('assets/boss/Boss')
 boss_group = pygame.sprite.Group()
+
+# weapon 
+weapon_spritesheet = WeaponSpritesheet('assets/weapon')
+weapon_group = pygame.sprite.Group()
 """
     GAME
 """
+beginning = True
 run = True
 while run:
     clock.tick(FPS)
+    if beginning:
+        boss_group.empty()
+        bluebird_group.empty()
+        fireball_group.empty()
+        weapon_group.empty()
+        beginning = False
+        
     if game_over == False:
         scroll = player.move(score)
 
@@ -211,10 +225,21 @@ while run:
             fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
             fireball_group.add(fireball)
         
+        keys=pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
+                last_attack = pygame.time.get_ticks()
+                weapon = Weapon(SCREEN_HEIGHT, 
+                                player.rect.x,
+                                player.rect.y - 10, 
+                                weapon_spritesheet, 0.5)
+                weapon_group.add(weapon)
         
         # Update group
         bluebird_group.update(scroll, SCREEN_WIDTH)
-        
+        platform_group.update(scroll)
+        fireball_group.update(scroll, SCREEN_HEIGHT)
+        weapon_group.update(scroll, SCREEN_HEIGHT)
         #update score
         if scroll > 0:
             score += scroll
@@ -223,21 +248,41 @@ while run:
         if score >= BOSS_LEVEL_SCORE:
             
             # Reset sprites
-            platform_group.empty()
-            bluebird_group.empty()
-
-            # Create starting platform
             platform = Platform(0, SCREEN_HEIGHT - 10, SCREEN_WIDTH, False, platform_image)
             platform_group.add(platform)
 
             if len(boss_group) == 0:
                 boss = Boss(SCREEN_WIDTH, 20, boss_spritesheet, 1.5)
                 boss_group.add(boss)
+            # Generate obstacles
+            if len(bluebird_group) == 0:
+                bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
+                bluebird_group.add(bluebird)
             
-            # Sprites update
+            if len(fireball_group) == 0:
+                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
+                fireball_group.add(fireball)
+            
+            keys=pygame.key.get_pressed()
+            if keys[pygame.K_SPACE]:
+                if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
+                    last_attack = pygame.time.get_ticks()
+                    weapon = Weapon(SCREEN_HEIGHT, 
+                                    player.rect.x,
+                                    player.rect.y - 10, 
+                                    weapon_spritesheet, 0.5)
+                    weapon_group.add(weapon)
+
+            # Update group
             boss_group.update(scroll, SCREEN_WIDTH)
             platform_group.update(scroll)
+            bluebird_group.update(scroll, SCREEN_WIDTH)
             fireball_group.update(scroll, SCREEN_HEIGHT)
+            boss_group.update(scroll, SCREEN_WIDTH)
+            weapon_group.update(scroll, SCREEN_HEIGHT)
+            #update score
+            if scroll > 0:
+                score += scroll
 
         # Draw panel
         if (score < BOSS_LEVEL_SCORE):
@@ -248,7 +293,7 @@ while run:
         bluebird_group.draw(screen)
         fireball_group.draw(screen)
         boss_group.draw(screen)
-
+        weapon_group.draw(screen)
         player.draw()
 
         #check game over
@@ -256,7 +301,20 @@ while run:
             game_over = True
             death_fx.play()
         
+        # Check collision
+        if pygame.sprite.spritecollide(player, bluebird_group, False):
+            if pygame.sprite.spritecollide(player, bluebird_group, False, pygame.sprite.collide_mask):
+                game_over = True
+                death_fx.play()
+        if pygame.sprite.spritecollide(player, fireball_group, False):
+            if pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask):
+                game_over = True
+                death_fx.play()
+        
+        if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
+            death_fx.play()
     else:
+        # Play again screen
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
             for y in range(0, 6, 2):
@@ -280,7 +338,7 @@ while run:
                 score = 0
                 scroll = 0
                 fade_counter = 0
-
+                beginning = True
                 # Reset the position of the player
                 player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
 
@@ -293,7 +351,7 @@ while run:
                 # Create starting platform
                 platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False, platform_image)
                 platform_group.add(platform)
-		    
+
 
     # event handler
     for event in pygame.event.get():
