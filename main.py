@@ -1,6 +1,7 @@
 import pygame
 import random
 import os
+from enum import Enum
 from pygame import mixer
 from constant import *
 from edge.platform import *
@@ -144,8 +145,7 @@ class Player(pygame.sprite.Sprite):
 
     def draw(self):
         screen.blit(pygame.transform.flip(self.image, self.flip, False), (self.rect.x - 12, self.rect.y - 5))
-
-
+        
 """
     Instances and sprite
 """
@@ -210,8 +210,8 @@ while run:
         
         
         # Update group
-        bluebird_group.update(0, SCREEN_WIDTH)
-        fireball_group.update(0, SCREEN_HEIGHT)
+        bluebird_group.update(scroll, SCREEN_WIDTH)
+        fireball_group.update(scroll, SCREEN_HEIGHT)
         
         #update score
         if scroll > 0:

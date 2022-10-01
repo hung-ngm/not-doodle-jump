@@ -1,3 +1,4 @@
+from enum import Enum
 # game window dimensions
 SCREEN_WIDTH = 400
 SCREEN_HEIGHT = 600
@@ -26,3 +27,6 @@ GRAVITY = 1
 #game variables
 SCROLL_THRESH = 200
 MAX_PLATFORMS = 10
+
+# Weapon 
+WEAPON_MENU = Enum("SWORD", "SHURIKEN", "FIRE")
