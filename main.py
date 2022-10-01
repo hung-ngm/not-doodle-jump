@@ -257,10 +257,9 @@ while run:
             platform_group.add(platform)
 
             if len(boss_group) == 0:
-                boss = Boss(SCREEN_WIDTH, SCREEN_WIDTH // 2 - 50, boss_spritesheet, 1.5)
+                boss = Boss(SCREEN_WIDTH, 0, boss_spritesheet, 1.5)
                 boss_group.add(boss)
                 
-            
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
