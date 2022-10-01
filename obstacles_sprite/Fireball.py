@@ -19,7 +19,7 @@ class Fireball(pygame.sprite.Sprite):
             self.animation_list.append(image)
         
         self.image = self.animation_list[self.frame_index]
-        self.rect = pygame.Rect((12,12), (64, 64))
+        self.rect = self.image.get_rect()
         self.rect.center = (x, 0)
         
     def update(self, scroll = 0, SCREEN_HEIGHT = 600):

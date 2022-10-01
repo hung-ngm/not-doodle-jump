@@ -187,6 +187,7 @@ minion_group = pygame.sprite.Group()
 # weapon 
 weapon_spritesheet = WeaponSpritesheet('assets/weapon')
 weapon_group = pygame.sprite.Group()
+
 """
     GAME
 """
@@ -327,7 +328,7 @@ while run:
         for bird in collided_birds:
             if bird not in has_collided:
                 player.lives -= 1
-                if player.lives < 0:
+                if player.lives == 0:
                     game_over = True
                     death_fx.play()
                 has_collided.append(bird)
@@ -337,7 +338,7 @@ while run:
         for fireball in collided_fireballs:
             if fireball not in has_collided:
                 player.lives -= 1
-                if player.lives < 0:
+                if player.lives == 0:
                     game_over = True
                     death_fx.play()
                 has_collided.append(fireball)
@@ -385,7 +386,7 @@ while run:
                 player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
 
                 # Reset lives of player
-                player.lives = 3
+                player.lives = PLAYER_LIVES
 
                 # Reset the enemies
                 bluebird_group.empty()
