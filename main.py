@@ -2,12 +2,12 @@ import pygame
 import random
 import os
 from pygame import mixer
-from obstacles_sprite.Bluebird import *
-from obstacles_sprite.BluebirdSpritesheet import *
-# from obstacles_sprite.Fireball import *
-# from obstacles_sprite.FireballSpritesheet import *
 from constant import *
 from edge.platform import *
+from obstacles_sprite.Bluebird import *
+from obstacles_sprite.BluebirdSpritesheet import *
+from obstacles_sprite.Fireball import *
+from obstacles_sprite.FireballSpritesheet import *
 
 """
     Initialise pygame
@@ -132,6 +132,7 @@ platform_group.add(platform)
 # obstacles groups
 bluebird_spritesheet = BluebirdSpritesheet('assets/obstacles/Bluebird')
 bluebird_group = pygame.sprite.Group()
+fireball_spritesheet = FireballSpritesheet('assets/obstacles/Fireball')
 fireball_group = pygame.sprite.Group()
 
 """
@@ -139,7 +140,6 @@ fireball_group = pygame.sprite.Group()
 """
 run = True
 while run:
-
     clock.tick(FPS)
     if game_over == False:
         scroll = player.move()
@@ -166,10 +166,18 @@ while run:
             bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
             bluebird_group.add(bluebird)
         
+        if len(fireball_group) == 0:
+            fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH -32), fireball_spritesheet, 1.5)
+            fireball_group.add(fireball)
+        
+        # Update group
         bluebird_group.update(0, SCREEN_WIDTH)
+        fireball_group.update(0, SCREEN_HEIGHT)
+        
         # Draw sprites
         platform_group.draw(screen)
         bluebird_group.draw(screen)
+        fireball_group.draw(screen)
         player.draw()
 
         #check game over
