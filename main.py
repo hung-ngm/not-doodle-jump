@@ -233,6 +233,7 @@ while run:
         if len(fireball_group) == 0:
             fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
             fireball_group.add(fireball)
+
         
         keys=pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
@@ -272,6 +273,10 @@ while run:
                 minion2 = Minion(SCREEN_WIDTH, 210, minion_spritesheet, -1, 1.5)
                 minion_group.add(minion1)
                 minion_group.add(minion2)
+            
+            if len(fireball_group) < MAX_FIREBALLS: 
+                new_fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
+                fireball_group.add(new_fireball)
 
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
