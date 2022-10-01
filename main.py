@@ -96,14 +96,13 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.vel_y = 0
         self.flip = False
-
-    def move(self):
+    
+    def move(self, score):
         #reset movement variables
         dx = 0
         dy = 0
         scroll = 0
 
-        #process input
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
             dx -= HORIZONTAL_SPEED
@@ -111,8 +110,12 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_RIGHT]:
             dx += HORIZONTAL_SPEED
             self.flip = False
+        
+        if (score >= 200):
+            if key[pygame.K_UP]:
+                dy -= VERTICAL_SPEED
 
-        #apply gravity
+ 
         self.vel_y += GRAVITY
         dy += self.vel_y
 
@@ -126,11 +129,12 @@ class Player(pygame.sprite.Sprite):
                         self.rect.bottom = platform.rect.top
                         dy = 0
                         self.vel_y = -20
-                        jump_fx.play()
+                        if (score > 200):
+                            self.vel_y = 0
 
         #check if player hit top of screen
         if self.rect.top <= SCROLL_THRESH:
-            #if player is jumping
+            # If player is jumping
             if self.vel_y < 0:
                 scroll = -dy
 
@@ -173,55 +177,68 @@ run = True
 while run:
     clock.tick(FPS)
     if game_over == False:
-        scroll = player.move()
+        scroll = player.move(score)
+
         # draw background
         bg_scroll += scroll
         if bg_scroll >= 600:
             bg_scroll = 0
         draw_bg(bg_scroll)
 
-        if score <= 1500:
+        # Generate platforms
+        if (len(platform_group) < MAX_PLATFORMS):
+            p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
+            p_x = random.randint(0, SCREEN_WIDTH - p_w)
+            p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
+            # Type 1 for moving platforms, type 2 for static platforms
+            p_type = random.randint(1, 2)
+
+            if p_type == 1 and score > 500:
+                p_moving = True
+            else:
+                p_moving = False
+            platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
+            platform_group.add(platform)
+
+        #update platforms
+        platform_group.update(scroll)
+
+        # Generate obstacles
+        if len(bluebird_group) == 0:
+            bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
+            bluebird_group.add(bluebird)
+        
+        if len(fireball_group) == 0:
+            fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
+            fireball_group.add(fireball)
+        
+        
+        # Update group
+        bluebird_group.update(scroll, SCREEN_WIDTH)
+        
+        #update score
+        if scroll > 0:
+            score += scroll
     
-            # Generate platforms
-            if (len(platform_group) < MAX_PLATFORMS):
-                p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
-                p_x = random.randint(0, SCREEN_WIDTH - p_w)
-                p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
-                # Type 1 for moving platforms, type 2 for static platforms
-                p_type = random.randint(1, 2)
-
-                if p_type == 1 and score > 500:
-                    p_moving = True
-                else:
-                    p_moving = False
-                platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
-                platform_group.add(platform)
-
-            #update platforms
-            platform_group.update(scroll)
-
-            # Generate obstacles
-            if len(bluebird_group) == 0:
-                bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
-                bluebird_group.add(bluebird)
+        # Boss level
+        if score >= 200:
             
-            if len(fireball_group) == 0:
-                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH -32), fireball_spritesheet, 1.5)
-                fireball_group.add(fireball)
-            
+            # Reset sprites
+            platform_group.empty()
+            bluebird_group.empty()
+
+            # Create starting platform
+            platform = Platform(0, SCREEN_HEIGHT - 10, SCREEN_WIDTH, False, platform_image)
+            platform_group.add(platform)
+
             if len(boss_group) == 0:
                 boss = Boss(SCREEN_WIDTH, 100, boss_spritesheet, 1.5)
                 boss_group.add(boss)
             
-            
-            # Update group
-            bluebird_group.update(scroll, SCREEN_WIDTH)
-            fireball_group.update(scroll, SCREEN_HEIGHT)
+            # Sprites update
             boss_group.update(scroll, SCREEN_WIDTH)
-            
-            #update score
-            if scroll > 0:
-                score += scroll
+            platform_group.update(scroll)
+            fireball_group.update(scroll, SCREEN_HEIGHT)
 
         #draw panel
         draw_panel()
@@ -238,7 +255,7 @@ while run:
         if player.rect.top > SCREEN_HEIGHT:
             game_over = True
             death_fx.play()
-    
+        
     else:
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
