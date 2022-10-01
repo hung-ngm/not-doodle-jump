@@ -11,8 +11,11 @@ from obstacles_sprite.Fireball import *
 from obstacles_sprite.FireballSpritesheet import *
 from boss.Boss import *
 from boss.BossSpritesheet import *
+from minion.Minion import *
+from minion.MinionSpritesheet import *
 from weapon.Weapon import *
 from weapon.WeaponSpritesheet import *
+
 """
     Initialise pygame
 """
@@ -40,29 +43,28 @@ game_over = False
 score = 0
 fade_counter = 0
 
-
 if os.path.exists('score.txt'):
     with open('score.txt', 'r') as file:
 	    high_score = int(file.read())
 else:
 	high_score = 0
 
-#font 
+# Font 
 font_small = pygame.font.SysFont('Pixeloid', 20)
 font_big = pygame.font.SysFont('Pixeloid', 24)
 
 """
     VARIABLES
 """
-# game variables
+# Game variables
 score = 0
 
-# set frame rate 
+# Set frame rate 
 clock = pygame.time.Clock()
 last_attack = pygame.time.get_ticks()
-# load music and sounds
+# Load music and sounds
 
-# load images
+# Load images
 bg_image = pygame.image.load('assets/gfx/bg.png').convert_alpha()
 platform_image = pygame.image.load('assets/gfx/wood.png').convert_alpha()
 player_image = pygame.image.load('assets/gfx/player.png').convert_alpha()
@@ -173,6 +175,10 @@ fireball_group = pygame.sprite.Group()
 boss_spritesheet = BossSpritesheet('assets/boss/Boss')
 boss_group = pygame.sprite.Group()
 
+# minion
+minion_spritesheet = MinionSpritesheet('assets/minion/Minion')
+minion_group = pygame.sprite.Group()
+
 # weapon 
 weapon_spritesheet = WeaponSpritesheet('assets/weapon')
 weapon_group = pygame.sprite.Group()
@@ -189,6 +195,7 @@ while run:
         bluebird_group.empty()
         fireball_group.empty()
         weapon_group.empty()
+        minion_group.empty()
         beginning = False
 
     if game_over == False:
@@ -259,7 +266,13 @@ while run:
             if len(boss_group) == 0:
                 boss = Boss(SCREEN_WIDTH, 0, boss_spritesheet, 1.5)
                 boss_group.add(boss)
-                
+            
+            if len(minion_group) == 0:
+                minion1 = Minion(SCREEN_WIDTH, 160, minion_spritesheet, 1, 1.5)
+                minion2 = Minion(SCREEN_WIDTH, 210, minion_spritesheet, -1, 1.5)
+                minion_group.add(minion1)
+                minion_group.add(minion2)
+
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
@@ -276,6 +289,7 @@ while run:
             bluebird_group.update(scroll, SCREEN_WIDTH)
             fireball_group.update(scroll, SCREEN_HEIGHT)
             weapon_group.update(scroll, SCREEN_HEIGHT)
+            minion_group.update(scroll, SCREEN_WIDTH)
 
             #update score
             if scroll > 0:
@@ -291,9 +305,10 @@ while run:
         fireball_group.draw(screen)
         boss_group.draw(screen)
         weapon_group.draw(screen)
+        minion_group.draw(screen)
         player.draw()
 
-        #check game over
+        # Check game over
         if player.rect.top > SCREEN_HEIGHT:
             game_over = True
             death_fx.play()
@@ -311,6 +326,14 @@ while run:
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
             hit_fx.play()
+        
+        if pygame.sprite.groupcollide(boss_group, weapon_group, False, True):
+            hit_fx.play()
+            boss.health -= 1
+            if boss.health == 0:
+                boss.kill()
+                boss_group.empty()
+                
     else:
         # Play again screen
         if fade_counter < SCREEN_WIDTH:
