@@ -38,7 +38,6 @@ game_over = False
 score = 0
 fade_counter = 0
 
-
 """
     VARIABLES
 """
@@ -100,7 +99,8 @@ class Player(pygame.sprite.Sprite):
                         jump_fx.play()
 
         #check if player hit top of screen
-        if self.rect.top <= SCROLL_THRESH:
+        if self.rect.top + dy <= SCROLL_THRESH:
+            dy = -self.rect.top
             #if player is jumping
             if self.vel_y < 0:
                 scroll = -dy
@@ -135,10 +135,6 @@ bluebird_group = pygame.sprite.Group()
 fireball_spritesheet = FireballSpritesheet('assets/obstacles/Fireball')
 fireball_group = pygame.sprite.Group()
 
-#function for drawing the background
-def draw_bg(bg_scroll):
-	screen.blit(bg_image, (0, 0 + bg_scroll))
-	screen.blit(bg_image, (0, -600 + bg_scroll))
 """
     GAME
 """
@@ -147,12 +143,8 @@ while run:
     clock.tick(FPS)
     if game_over == False:
         scroll = player.move()
-        
         # draw background
-        bg_scroll += scroll
-        if bg_scroll >= 600:
-            bg_scroll = 0
-        draw_bg(bg_scroll)
+        screen.blit(bg_image, (0,0))
     
         # Generate platforms
         if (len(platform_group) < MAX_PLATFORMS):
@@ -168,9 +160,6 @@ while run:
                 p_moving = False
             platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
             platform_group.add(platform)
-
-        #update platforms
-        platform_group.update(scroll)
 
         # Generate obstacles
         if len(bluebird_group) == 0:
