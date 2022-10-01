@@ -1,5 +1,6 @@
 import pygame
 import random
+import os
 from pygame import mixer
 from constant import *
 from edge.platform import *
@@ -36,6 +37,16 @@ game_over = False
 score = 0
 fade_counter = 0
 
+if os.path.exists('score.txt'):
+	with open('score.txt', 'r') as file:
+		high_score = int(file.read())
+else:
+	high_score = 0
+
+#font 
+font_small = pygame.font.SysFont('Pixeloid', 20)
+font_big = pygame.font.SysFont('Pixeloid', 24)
+
 """
     VARIABLES
 """
@@ -51,6 +62,21 @@ clock = pygame.time.Clock()
 bg_image = pygame.image.load('assets/gfx/bg.png').convert_alpha()
 platform_image = pygame.image.load('assets/gfx/wood.png').convert_alpha()
 player_image = pygame.image.load('assets/gfx/player.png').convert_alpha()
+
+"""
+    DRAW
+"""
+
+#function for outputting text onto the screen
+def draw_text(text, font, text_col, x, y):
+	img = font.render(text, True, text_col)
+	screen.blit(img, (x, y))
+
+#function for drawing info panel
+def draw_panel():
+	pygame.draw.rect(screen, PANEL, (0, 0, SCREEN_WIDTH, 30))
+	pygame.draw.line(screen, WHITE, (0, 30), (SCREEN_WIDTH, 30), 2)
+	draw_text('SCORE: ' + str(score), font_small, WHITE, 0, 0)
 
 #function for drawing the background
 def draw_bg(bg_scroll):
@@ -187,6 +213,12 @@ while run:
         bluebird_group.update(0, SCREEN_WIDTH)
         fireball_group.update(0, SCREEN_HEIGHT)
         
+        #update score
+        if scroll > 0:
+            score += scroll
+
+        #draw panel
+        draw_panel()
         
         # Draw sprites
         platform_group.draw(screen)
