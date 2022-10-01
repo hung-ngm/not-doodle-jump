@@ -97,31 +97,7 @@ class Player(pygame.sprite.Sprite):
         self.vel_y = 0
         self.flip = False
     
-    def boss_move(self):
-        dx = 0
-        dy = 0
-        scroll = 0
-
-        key = pygame.key.get_pressed()
-        if key[pygame.K_LEFT]:
-            dx -= HORIZONTAL_SPEED
-            print("left")
-            self.flip = True
-        if key[pygame.K_RIGHT]:
-            dx += HORIZONTAL_SPEED
-            print("right")
-            self.flip = False
-        
-        self.rect.x += dx
-        self.rect.y += dy + scroll
-
-        # Update mask
-        self.mask = pygame.mask.from_surface(self.image)
-
-        return scroll
-    
-        
-    def normal_move(self):
+    def move(self, score):
         #reset movement variables
         dx = 0
         dy = 0
@@ -135,7 +111,11 @@ class Player(pygame.sprite.Sprite):
             dx += HORIZONTAL_SPEED
             self.flip = False
         
-        #apply gravity
+        if (score >= 200):
+            if key[pygame.K_UP]:
+                dy -= VERTICAL_SPEED
+
+ 
         self.vel_y += GRAVITY
         dy += self.vel_y
 
@@ -149,11 +129,12 @@ class Player(pygame.sprite.Sprite):
                         self.rect.bottom = platform.rect.top
                         dy = 0
                         self.vel_y = -20
-                        jump_fx.play()
+                        if (score > 200):
+                            self.vel_y = 0
 
         #check if player hit top of screen
         if self.rect.top <= SCROLL_THRESH:
-            #if player is jumping
+            # If player is jumping
             if self.vel_y < 0:
                 scroll = -dy
 
@@ -196,70 +177,58 @@ run = True
 while run:
     clock.tick(FPS)
     if game_over == False:
-       
-        if score <= 200:
-            scroll = player.normal_move()
-            # draw background
-            bg_scroll += scroll
-            if bg_scroll >= 600:
-                bg_scroll = 0
-            draw_bg(bg_scroll)
+        scroll = player.move(score)
 
-            # Generate platforms
-            if (len(platform_group) < MAX_PLATFORMS):
-                p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
-                p_x = random.randint(0, SCREEN_WIDTH - p_w)
-                p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
-                # Type 1 for moving platforms, type 2 for static platforms
-                p_type = random.randint(1, 2)
+        # draw background
+        bg_scroll += scroll
+        if bg_scroll >= 600:
+            bg_scroll = 0
+        draw_bg(bg_scroll)
 
-                if p_type == 1 and score > 500:
-                    p_moving = True
-                else:
-                    p_moving = False
-                platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
-                platform_group.add(platform)
+        # Generate platforms
+        if (len(platform_group) < MAX_PLATFORMS):
+            p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
+            p_x = random.randint(0, SCREEN_WIDTH - p_w)
+            p_y = platform.rect.y - random.randint(PLATFORM_MIN_HEIGHT_DIFF, PLATFORM_MAX_HEIGHT_DIFF)
+            # Type 1 for moving platforms, type 2 for static platforms
+            p_type = random.randint(1, 2)
 
-            #update platforms
-            platform_group.update(scroll)
+            if p_type == 1 and score > 500:
+                p_moving = True
+            else:
+                p_moving = False
+            platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
+            platform_group.add(platform)
 
-            # Generate obstacles
-            if len(bluebird_group) == 0:
-                bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
-                bluebird_group.add(bluebird)
-            
-            if len(fireball_group) == 0:
-                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
-                fireball_group.add(fireball)
-            
-            
-            # Update group
-            bluebird_group.update(scroll, SCREEN_WIDTH)
-            
-            #update score
-            if scroll > 0:
-                score += scroll
+        #update platforms
+        platform_group.update(scroll)
+
+        # Generate obstacles
+        if len(bluebird_group) == 0:
+            bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
+            bluebird_group.add(bluebird)
         
+        if len(fireball_group) == 0:
+            fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
+            fireball_group.add(fireball)
+        
+        
+        # Update group
+        bluebird_group.update(scroll, SCREEN_WIDTH)
+        
+        #update score
+        if scroll > 0:
+            score += scroll
+    
         # Boss level
-        else:
-            scroll = player.boss_move()
-            # draw background
-            bg_scroll += scroll
-            if bg_scroll >= 600:
-                bg_scroll = 0
-            draw_bg(bg_scroll)
-
-            fade_counter = 0
-
-            # Reset the position of the player
-            player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
+        if score >= 200:
             
             # Reset sprites
             platform_group.empty()
             bluebird_group.empty()
 
             # Create starting platform
-            platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 10, 100, False, platform_image)
+            platform = Platform(0, SCREEN_HEIGHT - 10, SCREEN_WIDTH, False, platform_image)
             platform_group.add(platform)
 
             if len(boss_group) == 0:
@@ -268,6 +237,7 @@ while run:
             
             # Sprites update
             boss_group.update(scroll, SCREEN_WIDTH)
+            platform_group.update(scroll)
             fireball_group.update(scroll, SCREEN_HEIGHT)
 
         #draw panel
