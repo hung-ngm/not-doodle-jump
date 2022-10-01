@@ -27,7 +27,7 @@ class Bluebird(pygame.sprite.Sprite):
         self.rect.y = y
         
     def update(self, scroll = 0, SCREEN_WIDTH = 400):
-        ANIMATION_COOLDOWN = 50 #ms
+        ANIMATION_COOLDOWN = 2000 #ms
         
         self.image = self.animation_list[self.frame_index]
         if (pygame.time.get_ticks() - self.last_update_time) > ANIMATION_COOLDOWN:

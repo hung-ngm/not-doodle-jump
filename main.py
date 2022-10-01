@@ -43,6 +43,8 @@ game_over = False
 score = 0
 fade_counter = 0
 
+collided_sprite = []
+
 if os.path.exists('score.txt'):
     with open('score.txt', 'r') as file:
 	    high_score = int(file.read())
@@ -58,6 +60,7 @@ font_big = pygame.font.SysFont('Pixeloid', 24)
 """
 # Game variables
 score = 0
+has_collided = []
 
 # Set frame rate 
 clock = pygame.time.Clock()
@@ -79,10 +82,11 @@ def draw_text(text, font, text_col, x, y):
 	screen.blit(img, (x, y))
 
 #function for drawing info panel
-def draw_panel():
-	pygame.draw.rect(screen, PANEL, (0, 0, SCREEN_WIDTH, 30))
-	pygame.draw.line(screen, WHITE, (0, 30), (SCREEN_WIDTH, 30), 2)
-	draw_text('SCORE: ' + str(score), font_small, WHITE, 0, 0)
+def draw_panel(player):
+    pygame.draw.rect(screen, PANEL, (0, 0, SCREEN_WIDTH, 30))
+    pygame.draw.line(screen, WHITE, (0, 30), (SCREEN_WIDTH, 30), 2)
+    draw_text('SCORE: ' + str(score), font_small, WHITE, 0, 0)
+    draw_text('LIVES: ' + str(player.lives), font_small, WHITE, SCREEN_WIDTH // 2, 0)
 
 #function for drawing the background
 def draw_bg(bg_scroll):
@@ -101,6 +105,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.vel_y = 0
         self.flip = False
+        self.lives = PLAYER_LIVES
     
     def move(self, score):
         #reset movement variables
@@ -188,8 +193,7 @@ weapon_group = pygame.sprite.Group()
 # beginning = True
 run = True
 beginning = True
-while run:
-    clock.tick(FPS)    
+while run:  
     if beginning:
         boss_group.empty()
         bluebird_group.empty()
@@ -233,7 +237,7 @@ while run:
         if len(fireball_group) == 0:
             fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
             fireball_group.add(fireball)
-        
+
         keys=pygame.key.get_pressed()
         if keys[pygame.K_SPACE]:
             if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
@@ -272,6 +276,10 @@ while run:
                 minion2 = Minion(SCREEN_WIDTH, 210, minion_spritesheet, -1, 1.5)
                 minion_group.add(minion1)
                 minion_group.add(minion2)
+            
+            if len(fireball_group) < MAX_FIREBALLS: 
+                new_fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
+                fireball_group.add(new_fireball)
 
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
@@ -296,8 +304,7 @@ while run:
                 score += scroll
 
         # Draw panel
-        if (score < BOSS_LEVEL_SCORE):
-            draw_panel()
+        draw_panel(player)
         
         # Draw sprites
         platform_group.draw(screen)
@@ -314,15 +321,27 @@ while run:
             death_fx.play()
         
         # Check collision
-        # if pygame.sprite.spritecollide(player, bluebird_group, False):
-        #     if pygame.sprite.spritecollide(player, bluebird_group, False, pygame.sprite.collide_mask):
-        #         game_over = True
-        #         death_fx.play()
 
-        # if pygame.sprite.spritecollide(player, fireball_group, False):
-        #     if pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask):
-        #         game_over = True
-        #         death_fx.play()
+        # Collide with blue bird
+        collided_birds =  pygame.sprite.spritecollide(player, bluebird_group, False, pygame.sprite.collide_mask)
+        for bird in collided_birds:
+            if bird not in has_collided:
+                player.lives -= 1
+                if player.lives < 0:
+                    game_over = True
+                    death_fx.play()
+                has_collided.append(bird)
+
+        # Collide with fireball
+        collided_fireballs = pygame.sprite.spritecollide(player, fireball_group, False, pygame.sprite.collide_mask)
+        for fireball in collided_fireballs:
+            if fireball not in has_collided:
+                player.lives -= 1
+                if player.lives < 0:
+                    game_over = True
+                    death_fx.play()
+                has_collided.append(fireball)
+        
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
             hit_fx.play()
@@ -360,8 +379,13 @@ while run:
                 scroll = 0
                 fade_counter = 0
                 beginning = True
+                has_collided = []
+
                 # Reset the position of the player
                 player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
+
+                # Reset lives of player
+                player.lives = 3
 
                 # Reset the enemies
                 bluebird_group.empty()
@@ -381,5 +405,7 @@ while run:
     
     # update display window
     pygame.display.update()
+
+    clock.tick(FPS)  
     
 pygame.quit()
