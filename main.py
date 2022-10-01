@@ -96,14 +96,37 @@ class Player(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         self.vel_y = 0
         self.flip = False
+    
+    def boss_move(self):
+        dx = 0
+        dy = 0
+        scroll = 0
 
-    def move(self):
+        key = pygame.key.get_pressed()
+        if key[pygame.K_LEFT]:
+            dx -= HORIZONTAL_SPEED
+            print("left")
+            self.flip = True
+        if key[pygame.K_RIGHT]:
+            dx += HORIZONTAL_SPEED
+            print("right")
+            self.flip = False
+        
+        self.rect.x += dx
+        self.rect.y += dy + scroll
+
+        # Update mask
+        self.mask = pygame.mask.from_surface(self.image)
+
+        return scroll
+    
+        
+    def normal_move(self):
         #reset movement variables
         dx = 0
         dy = 0
         scroll = 0
 
-        #process input
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
             dx -= HORIZONTAL_SPEED
@@ -111,7 +134,7 @@ class Player(pygame.sprite.Sprite):
         if key[pygame.K_RIGHT]:
             dx += HORIZONTAL_SPEED
             self.flip = False
-
+        
         #apply gravity
         self.vel_y += GRAVITY
         dy += self.vel_y
@@ -173,15 +196,15 @@ run = True
 while run:
     clock.tick(FPS)
     if game_over == False:
-        scroll = player.move()
-        # draw background
-        bg_scroll += scroll
-        if bg_scroll >= 600:
-            bg_scroll = 0
-        draw_bg(bg_scroll)
+       
+        if score <= 200:
+            scroll = player.normal_move()
+            # draw background
+            bg_scroll += scroll
+            if bg_scroll >= 600:
+                bg_scroll = 0
+            draw_bg(bg_scroll)
 
-        if score <= 1500:
-    
             # Generate platforms
             if (len(platform_group) < MAX_PLATFORMS):
                 p_w = random.randint(PLATFORM_MIN_WIDTH, PLATFORM_MAX_WIDTH)
@@ -206,22 +229,46 @@ while run:
                 bluebird_group.add(bluebird)
             
             if len(fireball_group) == 0:
-                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH -32), fireball_spritesheet, 1.5)
+                fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
                 fireball_group.add(fireball)
-            
-            if len(boss_group) == 0:
-                boss = Boss(SCREEN_WIDTH, 100, boss_spritesheet, 1.5)
-                boss_group.add(boss)
             
             
             # Update group
             bluebird_group.update(scroll, SCREEN_WIDTH)
-            fireball_group.update(scroll, SCREEN_HEIGHT)
-            boss_group.update(scroll, SCREEN_WIDTH)
             
             #update score
             if scroll > 0:
                 score += scroll
+        
+        # Boss level
+        else:
+            scroll = player.boss_move()
+            # draw background
+            bg_scroll += scroll
+            if bg_scroll >= 600:
+                bg_scroll = 0
+            draw_bg(bg_scroll)
+
+            fade_counter = 0
+
+            # Reset the position of the player
+            player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
+            
+            # Reset sprites
+            platform_group.empty()
+            bluebird_group.empty()
+
+            # Create starting platform
+            platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 10, 100, False, platform_image)
+            platform_group.add(platform)
+
+            if len(boss_group) == 0:
+                boss = Boss(SCREEN_WIDTH, 100, boss_spritesheet, 1.5)
+                boss_group.add(boss)
+            
+            # Sprites update
+            boss_group.update(scroll, SCREEN_WIDTH)
+            fireball_group.update(scroll, SCREEN_HEIGHT)
 
         #draw panel
         draw_panel()
@@ -238,7 +285,7 @@ while run:
         if player.rect.top > SCREEN_HEIGHT:
             game_over = True
             death_fx.play()
-    
+        
     else:
         if fade_counter < SCREEN_WIDTH:
             fade_counter += 5
