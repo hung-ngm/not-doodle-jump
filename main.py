@@ -6,6 +6,8 @@ from obstacles_sprite.Bluebird import *
 from obstacles_sprite.BluebirdSpritesheet import *
 # from obstacles_sprite.Fireball import *
 # from obstacles_sprite.FireballSpritesheet import *
+from constant import *
+from edge.platform import *
 
 """
     Initialise pygame
@@ -22,38 +24,14 @@ jump_fx.set_volume(0.5)
 death_fx = pygame.mixer.Sound('assets/sfx/death.mp3')
 death_fx.set_volume(0.5)
 
-# game window dimensions
-SCREEN_WIDTH = 400
-SCREEN_HEIGHT = 600
 
-# frame rate
-FPS = 60
-
-# Colours 
-WHITE = (255,255, 255)
-BLACK = (0, 0, 0)
-PANEL = (153, 217, 234)
-
-# Platform constant
-MAX_PLATFORMS = 10
-PLATFORM_HEIGHT = 10
-PLATFORM_MIN_WIDTH = 40
-PLATFORM_MAX_WIDTH = 70
-PLATFORM_MIN_HEIGHT_DIFF = 80
-PLATFORM_MAX_HEIGHT_DIFF = 120
 
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
 
-# Speed
-HORIZONTAL_SPEED = 10
-VERTICAL_SPEED = 10
-GRAVITY = 1
+# Game variables
 
-#game variables
-SCROLL_THRESH = 200
-MAX_PLATFORMS = 10
 scroll = 0
 bg_scroll = 0
 game_over = False
@@ -75,25 +53,6 @@ clock = pygame.time.Clock()
 bg_image = pygame.image.load('assets/gfx/bg.png').convert_alpha()
 platform_image = pygame.image.load('assets/gfx/wood.png').convert_alpha()
 player_image = pygame.image.load('assets/gfx/player.png').convert_alpha()
-
-"""
-    PLATFORM
-"""
-class Platform(pygame.sprite.Sprite):
-    def __init__(self, x, y, width, moving):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(platform_image, (width, PLATFORM_HEIGHT))
-        self.moving = moving
-        self.move_counter = random.randint(0, 50)
-        self.direction = random.choice([-1, 1])
-        self.speed = random.randint(1, 2)
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
-    
-    # def update(self, scroll):
-        # TODO: add moving platforms
-        # Create starting platform
 
 """
     PLAYER
@@ -166,7 +125,7 @@ class Player(pygame.sprite.Sprite):
 player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
 
 # platform group 
-platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False)
+platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False, platform_image)
 platform_group = pygame.sprite.Group()
 platform_group.add(platform)   
 
@@ -199,7 +158,7 @@ while run:
                 p_moving = True
             else:
                 p_moving = False
-            platform = Platform(p_x, p_y, p_w, p_moving)
+            platform = Platform(p_x, p_y, p_w, p_moving, platform_image)
             platform_group.add(platform)
 
         # Generate obstacles
