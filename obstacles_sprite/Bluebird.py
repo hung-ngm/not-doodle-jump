@@ -24,6 +24,7 @@ class Bluebird(pygame.sprite.Sprite):
         self.image = self.animation_list[self.frame_index]
         self.rect = self.image.get_rect()
         self.rect.x = 0 if self.direction == 1 else SCREEN_WIDTH
+        self.rect.y = y
         
     def update(self, scroll = 0, SCREEN_WIDTH = 400):
         ANIMATION_COOLDOWN = 50 #ms
