@@ -5,7 +5,7 @@ class BossSpritesheet():
 		self.directory = folder_name
 
 	def get_image(self, frame, width, height, scale, colour):
-		STARTING_X_PIXEL_OF_BOSS = 46
+		STARTING_X_PIXEL_OF_BOSS = 50
 		STARTING_Y_PIXEL_OF_BOSS = 14
 		img = pygame.image.load('{}/{}.png'.format(self.directory, frame)).convert_alpha()
 		image = pygame.Surface((width, height)).convert_alpha() # Surface

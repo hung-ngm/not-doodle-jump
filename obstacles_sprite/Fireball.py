@@ -13,7 +13,7 @@ class Fireball(pygame.sprite.Sprite):
         
         # load image animation
         for animation_index in range(1, self.ANIMATIONS + 1):
-            image = sprite_sheet.get_image(animation_index, 35, 35, scale, (0, 0, 0))
+            image = sprite_sheet.get_image(animation_index, 34, 30, scale, (0, 0, 0))
             image = pygame.transform.flip(image, flip_x = True, flip_y = False)
             image.set_colorkey((0, 0, 0))
             self.animation_list.append(image)
