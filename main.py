@@ -273,6 +273,8 @@ while run:
             
         # Boss level
         if score >= BOSS_LEVEL_SCORE:
+            player.lives = BOSS_LEVEL_LIVES
+
             if(boss_mode == False):
                 bluebird_group.empty()
                 fireball_group.empty()
@@ -309,6 +311,7 @@ while run:
                         fireball_group.add(new_fireball)
                     except:
                         pass
+
             if len(fireball_group) < MAX_FIREBALLS: 
                 new_fireball = Fireball(SCREEN_HEIGHT, 
                                         x = boss.rect.x, 
@@ -346,12 +349,7 @@ while run:
 
         # Draw panel
         draw_panel(player)
-        for bird in bluebird_group:
-            bird.draw(screen)
-        for fireball in fireball_group:
-            fireball.draw(screen)
-        for boss in boss_group:
-            boss.draw(screen)
+        
         
         # Draw sprites
         platform_group.draw(screen)
