@@ -40,7 +40,7 @@ block_fx = pygame.mixer.Sound('assets/sfx/block.wav')
 block_fx.set_volume(0.5)
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption('HHH')
+pygame.display.set_caption('Ninjump')
 
 # Game variables
 scroll = 0
@@ -244,11 +244,12 @@ while run:
         platform_group.update(scroll)
 
         # Generate obstacles
-        if len(bluebird_group) < 2:
+        if len(bluebird_group) < 1 and (pygame.time.get_ticks() - last_birds_appear) > BIRDS_COOLDOWN:
+            last_birds_appear = pygame.time.get_ticks()
             bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
             bluebird_group.add(bluebird)
         
-        if len(fireball_group) < 2:
+        if len(fireball_group) < 1:
             fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
             fireball_group.add(fireball)
 
