@@ -25,7 +25,7 @@ pygame.init()
 """
     CONSTANTS
 """
-#sounds
+# sounds
 jump_fx = pygame.mixer.Sound('assets/sfx/jump.mp3')
 jump_fx.set_volume(0.5)
 damage_fx = pygame.mixer.Sound('assets/sfx/damage.mp3')
@@ -72,7 +72,6 @@ last_birds_appear = pygame.time.get_ticks()
 boss_killed = False
 # Set frame rate 
 clock = pygame.time.Clock()
-
 
 # Load images
 bg_image = pygame.image.load('assets/gfx/ninja-background.jpeg').convert_alpha()
@@ -275,8 +274,6 @@ while run:
             
         # Boss level
         if score >= BOSS_LEVEL_SCORE:
-            player.lives = BOSS_LEVEL_LIVES
-
             if(boss_mode == False):
                 bluebird_group.empty()
                 fireball_group.empty()
