@@ -75,7 +75,7 @@ clock = pygame.time.Clock()
 
 
 # Load images
-bg_image = pygame.image.load('assets/gfx/bg.png').convert_alpha()
+bg_image = pygame.image.load('assets/gfx/ninja-background.jpeg').convert_alpha()
 platform_image = pygame.image.load('assets/gfx/wood.png').convert_alpha()
 player_image = pygame.image.load('assets/gfx/player.png').convert_alpha()
 
@@ -234,7 +234,7 @@ while run:
             # Type 1 for moving platforms, type 2 for static platforms
             p_type = random.randint(1, 2)
 
-            if p_type == 1 and score > 500:
+            if p_type == 1 and score > MOVING_PLATFORM_SCORE:
                 p_moving = True
             else:
                 p_moving = False
@@ -370,7 +370,7 @@ while run:
         # Check collision
 
         # Collide with blue bird
-        collided_birds =  pygame.sprite.spritecollide(player, bluebird_group, False, pygame.sprite.collide_mask)
+        collided_birds =  pygame.sprite.spritecollide(player, bluebird_group, True, pygame.sprite.collide_mask)
         for bird in collided_birds:
             if bird not in has_collided:
                 player.lives -= 1

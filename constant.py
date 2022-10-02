@@ -9,7 +9,7 @@ FPS = 60
 # Colours 
 WHITE = (255,255, 255)
 BLACK = (0, 0, 0)
-PANEL = (153, 217, 234)
+PANEL = (161, 181, 179)
 
 # Platform constant
 PLATFORM_HEIGHT = 10
@@ -32,6 +32,9 @@ MAX_BLUEBIRDS = 2
 BIRDS_COOLDOWN = 2000
 # Level
 BOSS_LEVEL_SCORE = 1000
+
+# Moving platform score
+MOVING_PLATFORM_SCORE = 500
 
 # Weapon 
 ATTACK_COOLDOWN = 200
