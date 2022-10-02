@@ -28,6 +28,8 @@ pygame.init()
 #sounds
 jump_fx = pygame.mixer.Sound('assets/sfx/jump.mp3')
 jump_fx.set_volume(0.5)
+damage_fx = pygame.mixer.Sound('assets/sfx/damage.mp3')
+damage_fx.set_volume(0.5)
 death_fx = pygame.mixer.Sound('assets/sfx/death.mp3')
 death_fx.set_volume(0.5)
 hit_fx = pygame.mixer.Sound('assets/sfx/hit.wav')
@@ -372,7 +374,7 @@ while run:
         for bird in collided_birds:
             if bird not in has_collided:
                 player.lives -= 1
-
+                damage_fx.play()
                 if player.lives == 0:
                     game_over = True
                     death_fx.play()
@@ -383,7 +385,7 @@ while run:
         for fireball in collided_fireballs:
             if fireball not in has_collided:
                 player.lives -= 1
-
+                damage_fx.play()
                 if player.lives == 0:
                     game_over = True
                     death_fx.play()
