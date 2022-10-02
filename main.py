@@ -373,9 +373,9 @@ while run:
                 pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100))
         
         else:
-            draw_text('GAME OVER!', font_big, WHITE, 150, 200)
-            draw_text('SCORE: ' + str(score), font_big, WHITE, 155, 250)
-            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 65, 300)
+            draw_text('GAME OVER!', font_big, WHITE, 152, 200)
+            draw_text('SCORE:  ' + str(score), font_big, WHITE, 155, 250)
+            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 75, 300)
 			
             # Update high score
             if score > high_score:
