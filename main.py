@@ -314,8 +314,8 @@ while run:
             #     bird.draw(screen)
             # for fireball in fireball_group:
             #     fireball.draw(screen)
-            # for boss in boss_group:
-            #     boss.draw(screen)
+            for boss in boss_group:
+                boss.draw(screen)
             #update score
             if scroll > 0:
                 score += scroll
