@@ -42,4 +42,6 @@ class Bluebird(pygame.sprite.Sprite):
         if self.rect.right < 0 or self.rect.left > SCREEN_WIDTH:
             self.kill()
         
-    
+    def draw(self, screen):
+        screen.blit(self.image, self.rect)
+        pygame.draw.rect(screen, (0,0,0), self.rect)

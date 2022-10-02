@@ -19,7 +19,7 @@ class Boss(pygame.sprite.Sprite):
         
         # load image animation
         for animation_index in range(1, self.ANIMATIONS + 1):
-            image = sprite_sheet.get_image(animation_index, 288, 160, scale, (0, 0, 0))
+            image = sprite_sheet.get_image(animation_index, 100, 100, scale, (0, 0, 0))
             image = pygame.transform.flip(image, flip_x = self.flip, flip_y = False)
             image.set_colorkey((0, 0, 0))
             self.animation_list.append(image)
@@ -57,6 +57,7 @@ class Boss(pygame.sprite.Sprite):
             self.flip = True
     
     def draw(self, surface):
+        print(self.rect.size)
         surface.blit(self.image, self.rect)
         pygame.draw.rect(surface, (255, 255, 255), self.rect, 2)
         

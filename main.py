@@ -32,6 +32,8 @@ death_fx = pygame.mixer.Sound('assets/sfx/death.mp3')
 death_fx.set_volume(0.5)
 hit_fx = pygame.mixer.Sound('assets/sfx/hit.wav')
 hit_fx.set_volume(0.5)
+collide_fx = pygame.mixer.Sound('assets/sfx/collide.wav')
+collide_fx.set_volume(0.5)
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
@@ -42,7 +44,7 @@ bg_scroll = 0
 game_over = False
 score = 0
 fade_counter = 0
-
+boss_mode = False
 collided_sprite = []
 
 if os.path.exists('score.txt'):
@@ -98,6 +100,7 @@ def draw_bg(bg_scroll):
 """
 class Player(pygame.sprite.Sprite):
     def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
         self.image = pygame.transform.scale(player_image, (45, 45))
         self.width = 25
         self.height = 40
@@ -164,7 +167,8 @@ class Player(pygame.sprite.Sprite):
 """
 #player instance
 player = Player(SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
-
+player_group = pygame.sprite.Group()
+player_group.add(player)
 # platform group 
 platform = Platform(SCREEN_WIDTH // 2 - 50, SCREEN_HEIGHT - 50, 100, False, platform_image)
 platform_group = pygame.sprite.Group()
@@ -261,8 +265,11 @@ while run:
             
         # Boss level
         if score >= BOSS_LEVEL_SCORE:
+            if(boss_mode == False):
+                bluebird_group.empty()
+                fireball_group.empty()
+            boss_mode = True
             platform_group.empty()
-            bluebird_group.empty()
 
             # Reset sprites
             platform = Platform(0, SCREEN_HEIGHT - 10, SCREEN_WIDTH, False, platform_image)
@@ -282,6 +289,10 @@ while run:
                 new_fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
                 fireball_group.add(new_fireball)
 
+            if len(bluebird_group) < MAX_BLUEBIRDS:
+                bluebird = Bluebird(SCREEN_WIDTH, random.randint(300, 570), bluebird_spritesheet, 1.5)
+                bluebird_group.add(bluebird)
+        
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
@@ -300,6 +311,12 @@ while run:
             weapon_group.update(scroll, SCREEN_HEIGHT)
             minion_group.update(scroll, SCREEN_WIDTH)
 
+            # for bird in bluebird_group:
+            #     bird.draw(screen)
+            # for fireball in fireball_group:
+            #     fireball.draw(screen)
+            for boss in boss_group:
+                boss.draw(screen)
             #update score
             if scroll > 0:
                 score += scroll
@@ -341,8 +358,10 @@ while run:
                 if player.lives == 0:
                     game_over = True
                     death_fx.play()
-                has_collided.append(fireball)
-        
+            # else instant death                    
+            else:
+                game_over = True
+                death_fx.play()
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
             hit_fx.play()
@@ -353,6 +372,9 @@ while run:
             if boss.health == 0:
                 boss.kill()
                 boss_group.empty()
+                bluebird_group.empty()
+                fireball_group.empty()
+                minion_group.empty()
                 
     else:
         # Play again screen
@@ -363,9 +385,9 @@ while run:
                 pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100))
         
         else:
-            draw_text('GAME OVER!', font_big, WHITE, 150, 200)
-            draw_text('SCORE: ' + str(score), font_big, WHITE, 155, 250)
-            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 65, 300)
+            draw_text('GAME OVER!', font_big, WHITE, 152, 200)
+            draw_text('SCORE:  ' + str(score), font_big, WHITE, 155, 250)
+            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 75, 300)
 			
             # Update high score
             if score > high_score:
@@ -381,7 +403,7 @@ while run:
                 fade_counter = 0
                 beginning = True
                 has_collided = []
-
+                boss_mode = False
                 # Reset the position of the player
                 player.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT - 150)
 
