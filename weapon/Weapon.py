@@ -27,7 +27,7 @@ class Weapon(pygame.sprite.Sprite):
         self.rect.x = x
         self.rect.y = y
         
-    def update(self, scroll = 0, SCREEN_HEIGHT = 600):
+    def update(self, scroll = 0, SCREEN_HEIGHT = 600, shuriken_speed = 7):
         ANIMATION_COOLDOWN = 1000/60 #ms
         
         self.image = self.animation_list[self.frame_index]
@@ -37,7 +37,7 @@ class Weapon(pygame.sprite.Sprite):
         
         # move object
         # self.rect.x += self.direction * 2
-        self.rect.y += scroll - 10
+        self.rect.y += scroll - shuriken_speed
 
         # isOffScreen
         if self.rect.bottom < 0:
