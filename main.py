@@ -90,7 +90,7 @@ def draw_panel(player):
     pygame.draw.rect(screen, PANEL, (0, 0, SCREEN_WIDTH, 30))
     pygame.draw.line(screen, WHITE, (0, 30), (SCREEN_WIDTH, 30), 2)
     draw_text('SCORE: ' + str(score), font_small, WHITE, 0, 0)
-    draw_text('LIVES: ' + str(player.lives), font_small, WHITE, SCREEN_WIDTH // 2, 0)
+    draw_text('LIVES: ' + str(player.lives), font_small, WHITE, 170, 0)
 
 def draw_boss_lives(boss):
     pygame.draw.rect(screen, PANEL, (0, 0, SCREEN_WIDTH, 30))
