@@ -244,7 +244,7 @@ while run:
         platform_group.update(scroll)
 
         # Generate obstacles
-        if len(bluebird_group) < 1 and (pygame.time.get_ticks() - last_birds_appear) > BIRDS_COOLDOWN:
+        if len(bluebird_group) < MAX_BLUEBIRDS:
             last_birds_appear = pygame.time.get_ticks()
             bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
             bluebird_group.add(bluebird)
