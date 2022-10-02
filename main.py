@@ -34,6 +34,8 @@ hit_fx = pygame.mixer.Sound('assets/sfx/hit.wav')
 hit_fx.set_volume(0.5)
 collide_fx = pygame.mixer.Sound('assets/sfx/collide.wav')
 collide_fx.set_volume(0.5)
+block_fx = pygame.mixer.Sound('assets/sfx/block.wav')
+block_fx.set_volume(0.5)
 # create game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('HHH')
@@ -63,11 +65,12 @@ font_big = pygame.font.SysFont('Pixeloid', 24)
 # Game variables
 score = 0
 has_collided = []
-
+last_attack = pygame.time.get_ticks()
+last_birds_appear = pygame.time.get_ticks()
+boss_killed = False
 # Set frame rate 
 clock = pygame.time.Clock()
-last_attack = pygame.time.get_ticks()
-# Load music and sounds
+
 
 # Load images
 bg_image = pygame.image.load('assets/gfx/bg.png').convert_alpha()
@@ -88,6 +91,11 @@ def draw_panel(player):
     pygame.draw.line(screen, WHITE, (0, 30), (SCREEN_WIDTH, 30), 2)
     draw_text('SCORE: ' + str(score), font_small, WHITE, 0, 0)
     draw_text('LIVES: ' + str(player.lives), font_small, WHITE, SCREEN_WIDTH // 2, 0)
+
+def draw_boss_lives(boss):
+    pygame.draw.rect(screen, PANEL, (0, 0, SCREEN_WIDTH, 30))
+    pygame.draw.line(screen, WHITE, (0, 30), (SCREEN_WIDTH, 30), 2)
+    draw_text('HELEWHOIHFLIVES: ' + str(boss.health), font_small, WHITE, SCREEN_WIDTH // 2, 0)
 
 #function for drawing the background
 def draw_bg(bg_scroll):
@@ -235,11 +243,11 @@ while run:
         platform_group.update(scroll)
 
         # Generate obstacles
-        if len(bluebird_group) == 0:
+        if len(bluebird_group) < 2:
             bluebird = Bluebird(SCREEN_WIDTH, 100, bluebird_spritesheet, 1.5)
             bluebird_group.add(bluebird)
         
-        if len(fireball_group) == 0:
+        if len(fireball_group) < 2:
             fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
             fireball_group.add(fireball)
 
@@ -258,17 +266,17 @@ while run:
         platform_group.update(scroll)
         fireball_group.update(scroll, SCREEN_HEIGHT)
         weapon_group.update(scroll, SCREEN_HEIGHT)
-       
+
         #update score
         if scroll > 0:
             score += scroll
             
         # Boss level
         if score >= BOSS_LEVEL_SCORE:
-            # if(boss_mode == False):
-            bluebird_group.empty()
-            # fireball_group.empty()
-            # boss_mode = True
+            if(boss_mode == False):
+                bluebird_group.empty()
+                fireball_group.empty()
+            boss_mode = True
             platform_group.empty()
 
             # Reset sprites
@@ -278,19 +286,42 @@ while run:
             if len(boss_group) == 0:
                 boss = Boss(SCREEN_WIDTH, 0, boss_spritesheet, 1.5)
                 boss_group.add(boss)
+                draw_boss_lives(boss)
             
+            # Spawn minions
+            minion1 = Minion(SCREEN_WIDTH, 160, minion_spritesheet, 1, 1.5)
+            minion2 = Minion(SCREEN_WIDTH, 210, minion_spritesheet, -1, 1.5)
             if len(minion_group) == 0:
-                minion1 = Minion(SCREEN_WIDTH, 160, minion_spritesheet, 1, 1.5)
-                minion2 = Minion(SCREEN_WIDTH, 210, minion_spritesheet, -1, 1.5)
                 minion_group.add(minion1)
                 minion_group.add(minion2)
             
+            
+            # Spawn fireballs
             if len(fireball_group) < MAX_FIREBALLS: 
-                new_fireball = Fireball(SCREEN_HEIGHT, random.randint(32, SCREEN_WIDTH - 32), fireball_spritesheet, 1.5)
+                if(len(minion_group.sprites())):  
+                    try:  
+                        minion = minion_group.sprites()[random.randint(0,1)]
+                        new_fireball = Fireball(SCREEN_HEIGHT, 
+                                                x = minion.rect.x, 
+                                                sprite_sheet = fireball_spritesheet, 
+                                                scale = random.uniform(0.7, 1.2), 
+                                                y = minion.rect.y + 50)
+                        fireball_group.add(new_fireball)
+                    except:
+                        pass
+            if len(fireball_group) < MAX_FIREBALLS: 
+                new_fireball = Fireball(SCREEN_HEIGHT, 
+                                        x = boss.rect.x, 
+                                        sprite_sheet = fireball_spritesheet, 
+                                        scale = 3, 
+                                        y = boss.rect.y + 50)
                 fireball_group.add(new_fireball)
 
-           
-        
+            # Spawn bluebirds
+            if len(bluebird_group) < MAX_BLUEBIRDS:
+                bluebird = Bluebird(SCREEN_WIDTH, random.randint(300, 570), bluebird_spritesheet, 1.5)
+                bluebird_group.add(bluebird)
+
             keys=pygame.key.get_pressed()
             if keys[pygame.K_SPACE]:
                 if (pygame.time.get_ticks() - last_attack) >= ATTACK_COOLDOWN:
@@ -315,6 +346,12 @@ while run:
 
         # Draw panel
         draw_panel(player)
+        for bird in bluebird_group:
+            bird.draw(screen)
+        for fireball in fireball_group:
+            fireball.draw(screen)
+        for boss in boss_group:
+            boss.draw(screen)
         
         # Draw sprites
         platform_group.draw(screen)
@@ -355,7 +392,11 @@ while run:
         
         if pygame.sprite.groupcollide(bluebird_group, weapon_group, True, True):
             hit_fx.play()
+            score += 15
         
+        if pygame.sprite.groupcollide(minion_group, weapon_group, False, True):
+            block_fx.play()
+
         if pygame.sprite.groupcollide(boss_group, weapon_group, False, True):
             hit_fx.play()
             boss.health -= 1
@@ -365,6 +406,8 @@ while run:
                 bluebird_group.empty()
                 fireball_group.empty()
                 minion_group.empty()
+                boss_killed = True
+                game_over = True
                 
     else:
         # Play again screen
@@ -375,9 +418,12 @@ while run:
                 pygame.draw.rect(screen, BLACK, (SCREEN_WIDTH - fade_counter, (y + 1) * 100, SCREEN_WIDTH, 100))
         
         else:
-            draw_text('GAME OVER!', font_big, WHITE, 152, 200)
-            draw_text('SCORE:  ' + str(score), font_big, WHITE, 155, 250)
-            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 75, 300)
+            if(boss_killed):
+                draw_text('YOU WON!!!', font_big, WHITE, 150, 200)
+            else:
+                draw_text('GAME OVER!', font_big, WHITE, 150, 200)
+            draw_text('SCORE: ' + str(score), font_big, WHITE, 155, 250)
+            draw_text('PRESS ENTER TO PLAY AGAIN', font_big, WHITE, 65, 300)
 			
             # Update high score
             if score > high_score:

@@ -57,7 +57,6 @@ class Boss(pygame.sprite.Sprite):
             self.flip = True
     
     def draw(self, surface):
-        print(self.rect.size)
         surface.blit(self.image, self.rect)
         pygame.draw.rect(surface, (255, 255, 255), self.rect, 2)
         
